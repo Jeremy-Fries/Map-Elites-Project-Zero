@@ -25,7 +25,6 @@ class Individual{
     friend class Wrapper;
 protected:
     vector<double> genome1, genome2;
-    
 public:
 // --------------------------------------------------
             // Phenotypes
@@ -69,6 +68,11 @@ public:
     vector <double>& get_individual2();
             // Display individual2
     vector <double>& display_individual2();
+    
+    // build individual from another                // TODO
+    void build_individual_1_from_another(vector <double>);
+    void build_individual_2_from_another(vector <double>);
+    
 // --------------------------------------------------
             // Mutate
     void set_mutation_magnitude1(double);
@@ -97,14 +101,14 @@ private:
     int individual_size1, individual_size2;
     double mutation_magnitude1, mutation_magnitude2;
     int mutation_amount1, mutation_amount2;
-//    vector<double> genome1, genome2;
     vector<double> phenotype;
     
     // vector <double> movement;
     // vector <double> parents;
     
 };
-
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 void Individual::set_phenotypes(double p1, double p2){   // from simulation
     phenotype1=p1;
     phenotype2=p2;
@@ -209,6 +213,17 @@ void Individual::build_individual(){
     }
 }
 // --------------------------------------------------
+//  // build individual from another                
+void Individual::build_individual_1_from_another(vector <double> temp_individual1){
+    //genome1.clear();
+    genome1=temp_individual1;
+}
+
+void Individual::build_individual_2_from_another(vector <double> temp_individual2){
+    //genome2.clear();
+    genome2=temp_individual2;
+}
+// --------------------------------------------------
 // Get and display functions for the weights of the layers
 // Get Individual1
 vector<double>& Individual::get_individual1() {
@@ -255,7 +270,11 @@ void Individual::display_mutation_magnitude2(){
 // Mutation amount
 // amount of possible elements in Individual that can be mutated
 void Individual::set_mutation_amount1(int m1){     // 0-100%, input 15 for 15%
+    
+    
     mutation_amount1= m1;
+    
+    
 }
 double Individual::get_mutation_amount1(){
     return mutation_amount1;
@@ -276,15 +295,18 @@ void Individual::display_mutation_amount2(){
 // Mutate 1
 // randomly choose an element from the solution set and add random + or - number.
 void Individual::mutate1(){
-    int gs1 = individual_size1;
+    int gs1 = genome1.size();
     double range = mutation_magnitude1;
     int p1 = mutation_amount1;
-    for (int a=0; a<(gs1%p1); a++){
+    
+    for (int a=0; a<p1; a++){
         int dex1 = rand() % gs1;
         double r1 = ((double)rand() / RAND_MAX) * range;
         double r2 = ((double)rand() / RAND_MAX) * range;
-        genome1.at(dex1) += r1 - r2;
+        genome1.at(dex1) += r1;
+        genome1.at(dex1) -= r2;
     }
+    
 }
 // --------------------------------------------------
 // Mutate 2
@@ -293,7 +315,7 @@ void Individual::mutate2(){
     int gs2 = individual_size2;
     double range = mutation_magnitude2;
     int p2 = mutation_amount2;
-    for (int b=0; b<(gs2%p2); b++){
+    for (int b=0; b<p2; b++){
         int dex2 = rand() % gs2;
         double r1 = ((double)rand() / RAND_MAX) * range;
         double r2 = ((double)rand() / RAND_MAX) * range;

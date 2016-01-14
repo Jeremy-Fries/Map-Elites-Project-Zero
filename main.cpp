@@ -13,6 +13,7 @@
 #include <vector>
 #include <algorithm>
 #include <ostream>
+#include <fstream>
 
 #include "Wrapper.hpp"
 //#include "Individual.hpp"
@@ -29,7 +30,9 @@ int main() {
     
     //W.run_single_individual();
     
-    W.rand_bin();
+    W.mutate_MAP();
+    
+    W.graph_final();
     
     return 0;
 }
