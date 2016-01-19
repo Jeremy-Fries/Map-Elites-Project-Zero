@@ -602,6 +602,8 @@ void Map_Elites::print_heat_map(){
     myfile.open ("heat_map.txt");
     for(int element=0; element<full_bins.size();element++){
         myfile << full_bins.at(element).id << '\t';                             // ID of Bin
+        myfile << full_bins.at(element).bin1 << '\t';                           // Bin X
+        myfile << full_bins.at(element).bin2 << '\t';                           // Bin X
         myfile << full_bins.at(element).best_fit_rating  << '\t';               // Current fit rating in Bin
         myfile << full_bins.at(element).get_counter()  << '\t';                 // Times accessed
         myfile << full_bins.at(element).get_old_deleted_counter()  << '\t';     // Times new Individual is better
