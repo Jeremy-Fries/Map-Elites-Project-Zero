@@ -18,7 +18,13 @@
 #include "Wrapper.hpp"
 //#include "Individual.hpp"
 
+// TODO - Heat map, Parent tracking, Phenotype functions
 
+// Moment of landing
+// Pheno1- x-speed
+// Pheno2- orientation
+// fitness- total kinetic energy
+// very bad fitness for anything that doesn't land
 
 int main() {
     srand(time(NULL));
@@ -31,6 +37,8 @@ int main() {
     //W.run_single_individual();
     
     W.mutate_MAP();
+    
+    W.print_stuff();
     
     W.graph_final();
     

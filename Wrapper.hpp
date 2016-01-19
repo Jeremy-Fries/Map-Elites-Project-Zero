@@ -27,6 +27,8 @@ class Wrapper;
 using namespace std;
 
 class Wrapper{
+    
+// --------------------------------------------------
 protected:
     Map_Elites ME;
     Map_Elites* pME = &ME;
@@ -34,9 +36,10 @@ protected:
     Map_space* pMspace =  &mspace;
     Individual individual1;
     Individual* pI = &individual1;
-    
+// --------------------------------------------------
 public:
     const int hidden_layer_size = 3;
+    vector<double> best_fit;
 // --------------------------------------------------
     void initialize_wrapper();
     void wrapper_sets_I_params(int size1, int size2, double mut_mag1, double mut_mag2, int mut_amo1, int mut_amo2);
@@ -47,6 +50,7 @@ public:
     void rand_bin();
     void mutate_MAP();
     void run_single_individual();
+    void print_stuff();             // TODO - Change name
 // ----------------------------------------------------------------------------------- P0 Functions
         // P0 functions
     void build_real_set();
@@ -66,9 +70,7 @@ public:
     void graph_final();
     
     // Phenotypes: min, max,            integral output, range, calc d", # of pts d' is + or -, sum of average slopes,
-    
-    vector<double> best_fit;
-    
+// --------------------------------------------------
 private:
     int isize_1, isize_2, imutate_amount_1, imutate_amount_2;
     double imutate_mag_1,imutate_mag_2;
@@ -83,18 +85,16 @@ private:
     double calc_fit_rating;
     double fit_rating;
     double phenotype_1, phenotype_2;
-    
-    
 };
-// ----------------------------------------------------------------------------------- P0 Functions
+// ----------------------------------------------------------------------------------- P0 Functions------------------------------
 void Wrapper::build_real_set(){
     // [ a1 b1 a2 b2]
     // Creates [1 1 0 0]
     real_set.clear();
+    real_set.push_back(1);
+    real_set.push_back(1);
     real_set.push_back(0);
     real_set.push_back(0);
-    real_set.push_back(0);
-    real_set.push_back(5);
 }
 // ----------------------------------------------------------------------------------- P0 Functions
 double Wrapper::f_1(double x, double a1, double b1){
@@ -164,14 +164,26 @@ void Wrapper::find_phenotypes(){
     //double a, b;
     //a = f_1(x, soln_set.at(0), soln_set.at(1));
     //b = f_2(x, soln_set.at(2), soln_set.at(3));
-    
     double r1 = ((double)rand() / RAND_MAX);
     double r2 = ((double)rand() / RAND_MAX);
-    
     phenotype_1=r1*100;
     phenotype_2=r2*100;
-    
     //cout << a << " , " << b << endl;
+}
+// ----------------------------------------------------------------------------------- P0 Functions
+// Results for best Individual to grap
+void Wrapper::graph_final(){
+    soln_set.empty();       // only for P0
+    soln_set=ME.get_best_individual1();     // when implmented error.
+    ofstream myfile;
+    myfile.open ("Graph_approx_function.txt");
+    for (int xx=0; xx<100; xx++){
+        set_x_pos(xx);
+        double in_x=get_x_pos();
+        double out_y=approx_func();
+        myfile << fixed << setprecision(8) << in_x << "\t\t" << out_y << "\n";
+    }
+    myfile.close();
 }
 // --------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------
@@ -180,15 +192,12 @@ void Wrapper::rand_bin(){
     //rand()%(max-min)+min;
     bin1=0;
     bin2=0;
-    
     int b1_min=0;
     int b2_min=0;
     int b1_max=ME.get_resolution1();
     int b2_max=ME.get_resolution2();
-    
     bin1=rand()%(b1_max-b1_min)+b1_min;
     bin2=rand()%(b2_max-b2_min)+b2_min;
-    
     //cout << "bin to mutate is: (" << bin1 << "," << bin2 << ")" << endl;
 }
 // -------------------------------------------------------------------------------------------------------- To Change Settings
@@ -216,7 +225,7 @@ void Wrapper::wrapper_sets_I_params(int size1, int size2, double mut_mag1, doubl
     //individual1.set_individual_params(size1,size2,mut_mag1,mut_mag2,mut_amo1,mut_amo2);
     //set_individual_params(int individual_size1,int individual_size2,double mutation_magnitude1,double mutation_magnitude2,int mutation_amount1,int mutation_amount2);
 }
-// ----------------------------------------------------------------------------------- P0 Functions
+// ----------------------------------------------------------------------------------- P0 Functions 
 void Wrapper::fill_MAP_P0(){
     int fill_gen = ME.get_fill_generation();
     int fill_round=0;
@@ -224,8 +233,6 @@ void Wrapper::fill_MAP_P0(){
     
     for (int g=0; g<fill_gen; g++){
         //cout << "fill round is: " << g << endl;
-
-        
         Individual I;
         I.set_individual_params(isize_1, isize_2, imutate_mag_1, imutate_mag_2, imutate_amount_1, imutate_amount_2);
         //I.display_individual_params();
@@ -245,77 +252,50 @@ void Wrapper::fill_MAP_P0(){
         //I.display_phenotype1();
         //I.display_phenotype2();
         
-        ME.place_individual_in_map(I);
+        ME.challenger = I;
+        ME.place_individual_in_map();
         fill_round++;
         // push_back best fit rating to vector
         
     }
     cout << "completed " << fill_round << " FILL rounds" << endl;
 }
-// --------------------------------------------------
-void Wrapper::mutate_MAP(){                         // ROMOVE COMMENTS
+// --------------------------------------------------   
+void Wrapper::mutate_MAP(){                         // TODO - Remove Comments for main program--------------------
     int mut_gen = ME.get_mutate_generation();
     int mutation_round=0;
     for (int g=0; g<mut_gen; g++){
         //cout << "mutation round is: " << g << endl;
         soln_set.empty();       // only for P0
-
-        Individual I;
-        I.set_individual_params(isize_1, isize_2, imutate_mag_1, imutate_mag_2, imutate_amount_1, imutate_amount_2);
         rand_bin();                             // random bin location
-        ME.individual_from_map(bin1, bin2);     // copy Individual's vectors into temporary holder
-        I.build_individual_1_from_another(ME.get_temp_individual1());              // pass temp vectors to new Individual, setting individual1
-        //I.build_individual_1_from_another(ME.get_temp_individual2());              // pass temp vectors to new Individual, setting individual2
-        I.mutate1();                            // mutate Individual vectors
-        //I.mutate2();                            // mutate Individual vectors
-        //I.display_individual1();                // display mutated genome
-        //I.display_individual2();                // display mutated genome
-        
-        soln_set=I.get_individual1();     // only for P0
+        ME.individual_from_map(bin1, bin2);     // copy Individual's vectors at bin location
+        ME.challenger.mutate1();
+        soln_set=ME.challenger.get_individual1();     // only for P0
         fitness_P0();                           // fitness for new Individual
-        I.set_fit_rating(fit_rating);
-        //I.display_fit_rating();
-        
-        set_x_pos(10);   // at x=10, the value of a and b are the phenotypes    // only for P0
-        
+        ME.challenger.set_fit_rating(fit_rating);
+        //ME.challenger.display_fit_rating();
+        set_x_pos(10);   // at x=10, the value of a and b are the phenotypes--- NOT in USE    // only for P0
         find_phenotypes();
-        I.set_phenotypes(phenotype_1,phenotype_2);
-        //I.display_phenotype1();
-        //I.display_phenotype2();
-        
-        ME.place_individual_in_map(I);
+        ME.challenger.set_phenotypes(phenotype_1,phenotype_2);
+        //ME.challenger.display_phenotype1();
+        //ME.challenger.display_phenotype2();
+        ME.place_individual_in_map();
         mutation_round++;
-        if (g== mut_gen % 25){
-            cout << "25% done" << endl;
-        }
-        if (g== mut_gen % 50){
-            cout << "50% done" << endl;
-        }
-        if (g== mut_gen % 75){
-            cout << "75% done" << endl;
-        }
     }
     cout << "completed " << mutation_round << " MUTATION rounds" << endl;
-    ME.how_many_full_bins();
-    ME.print_contents_of_map();
-    ME.best_fit_bin_genome();
-    //ME.all_parents();
 }
-// --------------------------------------------------
-// run best Individual to graph
-void Wrapper::graph_final(){
-    soln_set.empty();       // only for P0
-    soln_set=ME.get_best_individual1();     // when implmented error.
-    
-    ofstream myfile;
-    myfile.open ("Graph_approx_function.txt");
-    for (int xx=0; xx<100; xx++){
-        set_x_pos(xx);
-        double in_x=get_x_pos();
-        double out_y=approx_func();
-        myfile << fixed << setprecision(8) << in_x << "\t\t" << out_y << "\n";
-    }
-    myfile.close();
+// --------------------------------------------------   
+            // Print stuff
+void Wrapper::print_stuff(){
+    ME.how_many_full_bins();
+    ME.best_fit_bin();
+    ME.print_fit_ratings_of_map();
+    ME.print_best_occupants_fitness();
+    ME.print_all_occupants();
+    ME.print_best_parents_fitness();
+    ME.print_best_parents_id();
+    ME.print_best_full_trace();
+    ME.print_heat_map();
 }
 // --------------------------------------------------
 // Run single test, modifiable weights of NN, recieve fit_rating and phenotypes.
